@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Webhook</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            line-height: 1.6;
+            color: #333;
+        }
+        h1 {
+            color: #0070f3;
+            border-bottom: 2px solid #0070f3;
+            padding-bottom: 0.5rem;
+        }
+        .status {
+            background: #f0f0f0;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #0070f3;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        code {
+            background: #f4f4f4;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+    <!-- Vercel Web Analytics -->
+    <script>
+        window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+    </script>
+    <script defer src="/_vercel/insights/script.js"></script>
+</head>
+<body>
+    <h1>WhatsApp Webhook Service</h1>
+    
+    <div class="status">
+        <span class="status-indicator"></span>
+        <strong>Service Status:</strong> Active
+    </div>
+    
+    <h2>About</h2>
+    <p>
+        This is a WhatsApp webhook service that integrates with Monday.com to manage incoming messages and leads.
+    </p>
+    
+    <h2>API Endpoint</h2>
+    <p>
+        The webhook is available at <code>/api/webhook</code> and supports:
+    </p>
+    <ul>
+        <li><strong>GET</strong> - Meta webhook verification</li>
+        <li><strong>POST</strong> - Process incoming WhatsApp messages</li>
+    </ul>
+    
+    <h2>Features</h2>
+    <ul>
+        <li>✅ Automatic lead creation in Monday.com</li>
+        <li>✅ Message history tracking</li>
+        <li>✅ Contact deduplication</li>
+        <li>✅ Real-time message processing</li>
+    </ul>
+    
+    <footer style="margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #ddd; color: #666; font-size: 0.9rem;">
+        <p>Powered by Vercel</p>
+    </footer>
+</body>
+</html>
