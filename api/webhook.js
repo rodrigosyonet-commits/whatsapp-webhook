@@ -72,10 +72,20 @@ export default async function handler(req, res) {
 
         // ✅ 2. SI EXISTE → ACTUALIZAR HISTORIAL
         if (item) {
-          const prevMessage =
-            item.column_values.find(
-              (c) => c.id === "long_text_mm3p7w7a"
-            )?.text || "";
+          const column = item.column_values.find(
+  (c) => c.id === "long_text_mm3p7w7a"
+);
+
+let prevMessage = "";
+
+if (column?.value) {
+  try {
+    const parsed = JSON.parse(column.value);
+    prevMessage = parsed.text || "";
+  } catch (e) {
+    prevMessage = "";
+  }
+}
 
           const newHistory =
             prevMessage + `\n${text}`;
