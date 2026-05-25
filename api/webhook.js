@@ -16,13 +16,14 @@ export default async function handler(req, res) {
     return res.status(403).send("Error");
   }
 
-  // ✅ PROCESAR MENSAJES
+  // ✅ PROCESAR MENSAJES ENTRANTES
   if (req.method === "POST") {
     try {
       const entry = req.body.entry?.[0];
       const change = entry?.changes?.[0];
       const value = change?.value;
 
+      // ✅ SOLO PROCESAR MENSAJES (no statuses)
       if (value?.messages) {
         const msg = value.messages[0];
         const contact = value.contacts?.[0];
@@ -33,10 +34,12 @@ export default async function handler(req, res) {
 
         console.log("📩 Mensaje recibido:", { name, phone, text });
 
-        // ✅ ESCAPE texto
+        // ✅ ESCAPE para evitar errores JSON
         const safeText = text.replace(/"/g, '\\"');
 
-        // ✅ 1. BUSCAR SI EL CONTACTO YA EXISTE
+        // ======================================================
+        // 🔎 1. BUSCAR SI EL CONTACTO YA EXISTE EN MONDAY
+        // ======================================================
         const search = await fetch("https://api.monday.com/v2", {
           method: "POST",
           headers: {
@@ -58,6 +61,7 @@ export default async function handler(req, res) {
                     column_values {
                       id
                       text
+                      value
                     }
                   }
                 }
@@ -70,29 +74,35 @@ export default async function handler(req, res) {
         const item =
           data.data?.items_page_by_column_values?.items?.[0] || null;
 
-        // ✅ 2. SI EXISTE → ACTUALIZAR HISTORIAL
+        // ======================================================
+        // 🔄 2. SI EXISTE → ACTUALIZAR HISTORIAL
+        // ======================================================
         if (item) {
+          console.log("🔄 Actualizando historial...");
+
           const column = item.column_values.find(
-  (c) => c.id === "long_text_mm3p7w7a"
-);
+            (c) => c.id === "long_text_mm3p7w7a"
+          );
 
-let prevMessage = "";
+          let prevMessage = "";
 
-if (column?.value) {
-  try {
-    const parsed = JSON.parse(column.value);
-    prevMessage = parsed.text || "";
-  } catch (e) {
-    prevMessage = "";
-  }
-}
+          // ✅ FIX IMPORTANTE: leer correctamente el valor
+          if (column?.value) {
+            try {
+              const parsed = JSON.parse(column.value);
+              prevMessage = parsed.text || "";
+            } catch (e) {
+              prevMessage = "";
+            }
+          }
 
-          const newHistory =
-            prevMessage + `\n${text}`;
+          const newHistory = prevMessage
+            ? `${prevMessage}\n[Cliente] ${text}`
+            : `[Cliente] ${text}`;
 
           const safeHistory = newHistory.replace(/"/g, '\\"');
 
-          console.log("🔄 Actualizando historial...");
+          console.log("🧾 Nuevo historial:", newHistory);
 
           await fetch("https://api.monday.com/v2", {
             method: "POST",
@@ -117,9 +127,13 @@ if (column?.value) {
           });
         }
 
-        // ✅ 3. SI NO EXISTE → CREAR NUEVO LEAD
+        // ======================================================
+        // 🆕 3. SI NO EXISTE → CREAR NUEVO LEAD
+        // ======================================================
         else {
           console.log("🆕 Creando nuevo lead...");
+
+          const firstMessage = `[Cliente] ${text}`;
 
           await fetch("https://api.monday.com/v2", {
             method: "POST",
@@ -133,7 +147,7 @@ if (column?.value) {
                   create_item(
                     board_id: ${BOARD_ID},
                     item_name: "${name}",
-                    column_values: "{\\"phone_mm3p1g70\\":{\\"phone\\":\\"${phone}\\"},\\"long_text_mm3p7w7a\\":{\\"text\\":\\"${safeText}\\"}}"
+                    column_values: "{\\"phone_mm3p1g70\\":{\\"phone\\":\\"${phone}\\"},\\"long_text_mm3p7w7a\\":{\\"text\\":\\"${firstMessage.replace(/"/g, '\\"')}\\"}}"
                   ) {
                     id
                   }
