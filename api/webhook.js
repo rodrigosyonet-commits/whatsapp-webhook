@@ -1,7 +1,7 @@
 export default async function handler(req, res) {
   const VERIFY_TOKEN = "rodrigo_token_123";
 
-  const MONDAY_API_KEY = "TU_API_KEY_AQUI";
+  const MONDAY_API_KEY = "eyJhbGciOiJIUzI1NiJ9.eyJ0aWQiOjY2Mjc0MDM4OCwiYWFpIjoxMSwidWlkIjoxMDMyMTE3MDQsImlhZCI6IjIwMjYtMDUtMjVUMjI6NDE6NDAuMDAwWiIsInBlciI6Im1lOndyaXRlIiwiYWN0aWQiOjgzMjY0MTAsInJnbiI6InVzZTEifQ.aCSoGeqhkzLvJ_TUn4xuIisR3seqR5VGbaBSR-2Os3w";
   const BOARD_ID = 18414789099;
 
   // ✅ VERIFICACIÓN META
