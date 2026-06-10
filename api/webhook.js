@@ -48,18 +48,25 @@ export default async function handler(req, res) {
 
       console.log("📥 BODY:", JSON.stringify(req.body));
 
-      // ======================================================
-      // ✅ 1. MONDAY → WHATSAPP
+     // ======================================================
+      // 📤 MENSAJE DESDE MONDAY → WHATSAPP
       // ======================================================
       if (req.body.replyText && req.body.contactPhone) {
 
         const { contactPhone, replyText } = req.body;
 
+        // ✅ limpiar teléfono
         const clean = contactPhone.replace(/[^0-9]/g, "");
         const finalPhone = clean.startsWith("52") ? clean : "52" + clean;
 
-        console.log("📤 Enviando:", finalPhone, replyText);
+        console.log("📤 Enviando mensaje:", {
+          telefono: finalPhone,
+          texto: replyText
+        });
 
+        // ======================================================
+        // ✅ 1. INTENTO → TEXTO (si hay ventana abierta)
+        // ======================================================
         let response = await fetch(
           `https://graph.facebook.com/v25.0/${PHONE_NUMBER_ID}/messages`,
           {
@@ -71,18 +78,20 @@ export default async function handler(req, res) {
             body: JSON.stringify({
               messaging_product: "whatsapp",
               to: finalPhone,
-              text: { body: replyText },
+              text: { body: replyText }, // ✅ usa el texto de Monday
             }),
           }
         );
 
         let data = await response.json();
-        console.log("📡 WA TEXT:", data);
+        console.log("📡 RESPONSE TEXT:", data);
 
-        // fallback template
+        // ======================================================
+        // ✅ 2. FALLBACK → TEMPLATE (si no hay ventana)
+        // ======================================================
         if (!response.ok) {
 
-          console.log("⚠️ Usando template fallback");
+          console.log("⚠️ Ventana cerrada → usando template");
 
           response = await fetch(
             `https://graph.facebook.com/v25.0/${PHONE_NUMBER_ID}/messages`,
@@ -105,15 +114,19 @@ export default async function handler(req, res) {
           );
 
           data = await response.json();
-          console.log("📡 WA TEMPLATE:", data);
+          console.log("📡 RESPONSE TEMPLATE:", data);
 
           if (!response.ok) {
             throw new Error(JSON.stringify(data));
           }
         }
 
+        console.log("✅ Mensaje enviado correctamente");
+
         return res.status(200).json({ success: true });
       }
+
+
 
       // ======================================================
       // ✅ 2. WHATSAPP → MONDAY
